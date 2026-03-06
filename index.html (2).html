@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pesquisa de Gôndola</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222637;
+    --border: #2e3248;
+    --accent: #4f7cff;
+    --accent2: #38d9a9;
+    --warn: #ff7c4f;
+    --text: #e8eaf6;
+    --muted: #6b7280;
+    --input-bg: #13151e;
+    --green: #38d9a9;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overscroll-behavior: none;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .app-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .step-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    color: var(--muted);
+  }
+  .step-pill span { color: var(--text); font-weight: 600; }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    position: sticky;
+    top: 57px;
+    z-index: 99;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    display: none;
+    padding: 24px 20px 100px;
+    animation: fadeUp .3s ease;
+  }
+  .section.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 24px;
+    line-height: 1.2;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* ── FORM FIELDS ── */
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+  }
+
+  input[type=text], input[type=number], input[type=date], select {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    padding: 14px 16px;
+    outline: none;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input:focus, select:focus {
+    border-color: var(--accent);
+  }
+  input[type=number] {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: .05em;
+  }
+
+  select option { background: var(--surface2); }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── STEPPER ── */
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .stepper button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 22px;
+    font-weight: 300;
+    width: 52px;
+    height: 52px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s;
+    flex-shrink: 0;
+  }
+  .stepper button:active { background: var(--surface2); }
+  .stepper input {
+    border: none;
+    border-radius: 0;
+    flex: 1;
+    padding: 0;
+    height: 52px;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+
+  /* ── GONDOLA BLOCK ── */
+  .gondola-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .gondola-header {
+    background: var(--surface2);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .gondola-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    background: rgba(79,124,255,.12);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .gondola-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+    margin: 0 12px;
+  }
+  .gondola-chevron {
+    color: var(--muted);
+    font-size: 18px;
+    transition: transform .25s;
+  }
+  .gondola-block.open .gondola-chevron { transform: rotate(180deg); }
+  .gondola-body {
+    display: none;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .gondola-block.open .gondola-body { display: block; }
+  .gondola-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  /* ── TYPE / BRAND ROWS ── */
+  .tipo-row, .marca-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .tipo-nome, .marca-nome-label {
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+    color: var(--text);
+  }
+  .tipo-row .stepper, .marca-row .stepper {
+    width: 130px;
+    flex-shrink: 0;
+  }
+  .marca-nome-input {
+    flex: 1;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 10px 14px;
+    outline: none;
+    min-width: 0;
+  }
+  .marca-nome-input:focus { border-color: var(--accent); }
+
+  .add-btn {
+    width: 100%;
+    background: none;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 14px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    margin-top: 4px;
+  }
+  .add-btn:active { background: var(--surface2); }
+
+  /* ── PREÇO TABLE ── */
+  .preco-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .preco-row-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .preco-row-bot {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .preco-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .preco-input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--accent2);
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+  }
+  .preco-input:focus { border-color: var(--accent2); }
+  .preco-input.promo { color: var(--warn); }
+  .preco-input.promo:focus { border-color: var(--warn); }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    float: right;
+    margin-top: -4px;
+  }
+
+  /* ── NAV BUTTONS ── */
+  .nav-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    padding: 16px 20px;
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+  }
+
+  .btn {
+    flex: 1;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 16px;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+    letter-spacing: .02em;
+  }
+  .btn:active { opacity: .8; transform: scale(.98); }
+  .btn-back {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    flex: 0 0 80px;
+  }
+  .btn-next {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(79,124,255,.35);
+  }
+  .btn-save {
+    background: linear-gradient(135deg, var(--accent2), #20a876);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(56,217,169,.3);
+  }
+
+  /* ── SUMMARY ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    text-align: center;
+  }
+  .summary-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .summary-key {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <span class="app-title">🐱 Gôndola Field</span>
+  <span class="step-pill">Etapa <span id="stepLabel">1</span> de 5</span>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+
+<!-- ══ SEÇÃO 1: LOJA ══ -->
+<div class="section active" id="sec1">
+  <div class="section-label">Etapa 1</div>
+  <div class="section-title">Identificação<br>da Loja</div>
+
+  <div class="card">
+    <div class="field">
+      <label>Rede / Bandeira</label>
+      <input type="text" id="rede" placeholder="Ex: Petz, Petlove, Carrefour…">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Cidade</label>
+        <input type="text" id="cidade" placeholder="São Paulo">
+      </div>
+      <div class="field">
+        <label>UF</label>
+        <input type="text" id="uf" placeholder="SP" maxlength="2">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Data</label>
+        <input type="date" id="data">
+      </div>
+      <div class="field">
+        <label>Canal</label>
+        <select id="canal">
+          <option value="">Selecionar…</option>
+          <option>Petshop</option>
+          <option>Supermercado</option>
+          <option>Farmácia</option>
+          <option>Atacado</option>
+          <option>Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Pesquisador</label>
+      <input type="text" id="pesquisador" placeholder="Seu nome">
+    </div>
+  </div>
+</div>
+
+<!-- ══ SEÇÃO 2: GÔNDOLAS ══ -->
+<div class="section" id="sec2">
+  <div class="section-label">Etapa 2</div>
+  <div class="section-title">Gôndolas</div>
+  <div id="gondolaList"></div>
+  <button class="add-btn" onclick="addGondola()">+ Adicionar Gôndola</button>
+</div>
+
+<!-- ══ SEÇÃO 3: TIPO DE AREIA ══ -->
+<div class="section" id="sec3">
+  <div class="section-label">Etapa 3</div>
+  <div class="section-title">Frentes por<br>Tipo de Areia</div>
+  <div id="tipoList"></div>
+  <button class="add-btn" onclick="addTipoRow()">+ Adicionar Tipo</button>
+</div>
+
+<!-- ══ SEÇÃO 4: MARCA ══ -->
+<div class="section" id="sec4">
+  <div class="section-label">Etapa 4</div>
+  <div class="section-title">Frentes por<br>Marca</div>
+  <div id="marcaFrenteList"></div>
+  <button class="add-btn" onclick="addMarcaFrente()">+ Adicionar Marca</button>
+</div>
+
+<!-- ══ SEÇÃO 5: MARCA E PREÇO ══ -->
+<div class="section" id="sec5">
+  <div class="section-label">Etapa 5</div>
+  <div class="section-title">Marca e Preço</div>
+  <div id="precoList"></div>
+  <button class="add-btn" onclick="addPrecoRow()">+ Adicionar SKU</button>
+</div>
+
+<!-- ══ NAV BAR ══ -->
+<div class="nav-bar">
+  <button class="btn btn-back" id="btnBack" onclick="goBack()" style="display:none">←</button>
+  <button class="btn btn-next" id="btnNext" onclick="goNext()">Próximo →</button>
+  <button class="btn btn-save" id="btnSave" onclick="exportCSV()" style="display:none">⬇ Exportar</button>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────
+let currentStep = 1;
+const totalSteps = 5;
+
+// ── Init ───────────────────────────────────────────────
+document.getElementById('data').valueAsDate = new Date();
+
+// Default gondola
+addGondola();
+// Default tipo rows
+addTipoRow(); addTipoRow(); addTipoRow();
+// Default marca frente
+addMarcaFrente(); addMarcaFrente(); addMarcaFrente();
+// Default preco rows
+addPrecoRow(); addPrecoRow(); addPrecoRow();
+
+// ── Tipo de Areia ──────────────────────────────────────
+function addTipoRow() {
+  const id = `tr${Date.now()}`;
+  const div = document.createElement('div');
+  div.className = 'marca-row';
+  div.id = id;
+  div.innerHTML = `
+    <input class="marca-nome-input" type="text" placeholder="Tipo de areia…" inputmode="text">
+    <div class="stepper" style="width:130px">
+      <button onclick="stepperChange('trq${id}',-1)">−</button>
+      <input type="number" id="trq${id}" value="0" min="0" inputmode="numeric">
+      <button onclick="stepperChange('trq${id}',1)">+</button>
+    </div>
+    <button class="del-btn" onclick="this.closest('.marca-row').remove()">×</button>`;
+  document.getElementById('tipoList').appendChild(div);
+}
+
+
+function addGondola() {
+  const n = document.querySelectorAll('.gondola-block').length + 1;
+  const id = `g${Date.now()}`;
+  const div = document.createElement('div');
+  div.className = 'gondola-block open';
+  div.id = id;
+  div.innerHTML = `
+    <div class="gondola-header" onclick="toggleGondola('${id}')">
+      <span class="gondola-num">G${n}</span>
+      <span class="gondola-name">Gôndola ${n}</span>
+      <span class="gondola-chevron">⌃</span>
+    </div>
+    <div class="gondola-body">
+      <div class="gondola-metrics">
+        <div class="field">
+          <label>Módulos</label>
+          <div class="stepper">
+            <button onclick="stepperChange('mod${id}',-1)">−</button>
+            <input type="number" id="mod${id}" value="0" min="0" inputmode="numeric">
+            <button onclick="stepperChange('mod${id}',1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Prateleiras</label>
+          <div class="stepper">
+            <button onclick="stepperChange('prat${id}',-1)">−</button>
+            <input type="number" id="prat${id}" value="0" min="0" inputmode="numeric">
+            <button onclick="stepperChange('prat${id}',1)">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Localização</label>
+        <input type="text" id="loc${id}" placeholder="Ex: Corredor 3, entrada…">
+      </div>
+    </div>`;
+  document.getElementById('gondolaList').appendChild(div);
+}
+
+function toggleGondola(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ── Marca Frentes ──────────────────────────────────────
+function addMarcaFrente() {
+  const id = `mf${Date.now()}`;
+  const div = document.createElement('div');
+  div.className = 'marca-row';
+  div.id = id;
+  div.innerHTML = `
+    <input class="marca-nome-input" type="text" placeholder="Nome da marca…" inputmode="text">
+    <div class="stepper" style="width:130px">
+      <button onclick="stepperChange('mfq${id}',-1)">−</button>
+      <input type="number" id="mfq${id}" value="0" min="0" inputmode="numeric">
+      <button onclick="stepperChange('mfq${id}',1)">+</button>
+    </div>
+    <button class="del-btn" onclick="this.closest('.marca-row').remove()">×</button>`;
+  document.getElementById('marcaFrenteList').appendChild(div);
+}
+
+// ── Preços ─────────────────────────────────────────────
+function addPrecoRow() {
+  const id = `pr${Date.now()}`;
+  const div = document.createElement('div');
+  div.className = 'preco-row';
+  div.id = id;
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:13px;font-weight:600;color:var(--muted)">SKU</span>
+      <button class="del-btn" onclick="this.closest('.preco-row').remove()">×</button>
+    </div>
+    <div class="preco-row-top">
+      <div>
+        <div class="preco-label">Marca</div>
+        <input type="text" class="marca-nome-input" style="width:100%;padding:10px 12px;font-size:14px" placeholder="Marca…">
+      </div>
+      <div>
+        <div class="preco-label">Produto / SKU</div>
+        <input type="text" class="marca-nome-input" style="width:100%;padding:10px 12px;font-size:14px" placeholder="Descrição…">
+      </div>
+    </div>
+    <div class="preco-row-bot">
+      <div>
+        <div class="preco-label">Preço Tabela</div>
+        <input type="number" class="preco-input" placeholder="0,00" step="0.01" inputmode="decimal">
+      </div>
+      <div>
+        <div class="preco-label">Preço Promo</div>
+        <input type="number" class="preco-input promo" placeholder="0,00" step="0.01" inputmode="decimal">
+      </div>
+    </div>`;
+  document.getElementById('precoList').appendChild(div);
+}
+
+// ── Stepper ────────────────────────────────────────────
+function stepperChange(id, delta) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const val = Math.max(0, (parseInt(el.value) || 0) + delta);
+  el.value = val;
+}
+
+// ── Navigation ─────────────────────────────────────────
+function goNext() {
+  if (currentStep < totalSteps) {
+    currentStep++;
+    updateUI();
+  }
+}
+function goBack() {
+  if (currentStep > 1) {
+    currentStep--;
+    updateUI();
+  }
+}
+
+function updateUI() {
+  document.querySelectorAll('.section').forEach((s,i) => {
+    s.classList.toggle('active', i + 1 === currentStep);
+  });
+  const pct = (currentStep / totalSteps) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepLabel').textContent = currentStep;
+  document.getElementById('btnBack').style.display = currentStep > 1 ? 'block' : 'none';
+  document.getElementById('btnNext').style.display = currentStep < totalSteps ? 'block' : 'none';
+  document.getElementById('btnSave').style.display = currentStep === totalSteps ? 'block' : 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Export CSV ─────────────────────────────────────────
+function exportCSV() {
+  const dataHoje = document.getElementById('data').value || new Date().toISOString().slice(0,10);
+  const rede = (document.getElementById('rede').value || 'Loja').replace(/[^a-zA-Z0-9]/g,'_');
+  let csv = '\uFEFF';
+
+  // Loja
+  csv += 'IDENTIFICAÇÃO\r\n';
+  csv += 'Rede;' + (document.getElementById('rede').value||'') + '\r\n';
+  csv += 'Cidade;' + (document.getElementById('cidade').value||'') + ' - ' + (document.getElementById('uf').value||'') + '\r\n';
+  csv += 'Canal;' + (document.getElementById('canal').value||'') + '\r\n';
+  csv += 'Data;' + dataHoje + '\r\n';
+  csv += 'Pesquisador;' + (document.getElementById('pesquisador').value||'') + '\r\n\r\n';
+
+  // Gôndolas
+  csv += 'GONDOLAS\r\nGondola;Localizacao;Modulos;Prateleiras\r\n';
+  document.querySelectorAll('.gondola-block').forEach((g,i) => {
+    const id = g.id;
+    const loc  = (g.querySelector('[id^="loc"]')?.value  || '').replace(/;/g,',');
+    const mod  =  g.querySelector('[id^="mod"]')?.value  || 0;
+    const prat =  g.querySelector('[id^="prat"]')?.value || 0;
+    csv += 'Gondola ' + (i+1) + ';' + loc + ';' + mod + ';' + prat + '\r\n';
+  });
+  csv += '\r\n';
+
+  // Tipos
+  csv += 'FRENTES POR TIPO\r\nTipo;Frentes\r\n';
+  document.querySelectorAll('#tipoList .marca-row').forEach(row => {
+    const nome = row.querySelector('.marca-nome-input')?.value || '';
+    const qtd  = row.querySelector('input[type=number]')?.value || 0;
+    if (nome.trim()) csv += nome.replace(/;/g,',') + ';' + qtd + '\r\n';
+  });
+  csv += '\r\n';
+
+  // Marcas frentes
+  csv += 'FRENTES POR MARCA\r\nMarca;Frentes\r\n';
+  document.querySelectorAll('#marcaFrenteList .marca-row').forEach(row => {
+    const nome = row.querySelector('.marca-nome-input')?.value || '';
+    const qtd  = row.querySelector('input[type=number]')?.value || 0;
+    if (nome.trim()) csv += nome.replace(/;/g,',') + ';' + qtd + '\r\n';
+  });
+  csv += '\r\n';
+
+  // Preços
+  csv += 'MARCA E PRECO\r\nMarca;Produto SKU;Preco Tabela;Preco Promo\r\n';
+  document.querySelectorAll('#precoList .preco-row').forEach(row => {
+    const textos = row.querySelectorAll('input[type=text]');
+    const nums   = row.querySelectorAll('input[type=number]');
+    const marca  = (textos[0]?.value||'').replace(/;/g,',');
+    const sku    = (textos[1]?.value||'').replace(/;/g,',');
+    const ptab   = nums[0]?.value || '';
+    const ppro   = nums[1]?.value || '';
+    if (marca.trim() || sku.trim()) csv += marca+';'+sku+';'+ptab+';'+ppro+'\r\n';
+  });
+
+  const filename = 'pesquisa_' + rede + '_' + dataHoje + '.csv';
+
+  // Tenta download universal — funciona no Android e iOS 13+
+  try {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+  } catch(e) {}
+
+  // Sempre mostra modal com os dados — fallback garantido para iOS
+  document.getElementById('exportModal').style.display = 'flex';
+  document.getElementById('exportText').value = csv;
+}
+
+function copyExport() {
+  const ta = document.getElementById('exportText');
+  ta.select();
+  ta.setSelectionRange(0, 99999);
+  const btn = document.getElementById('copyBtn');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(ta.value).then(() => {
+      btn.textContent = '✓ Copiado!';
+      setTimeout(() => btn.textContent = 'Copiar tudo', 2500);
+    }).catch(() => {
+      document.execCommand('copy');
+      btn.textContent = '✓ Copiado!';
+      setTimeout(() => btn.textContent = 'Copiar tudo', 2500);
+    });
+  } else {
+    document.execCommand('copy');
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => btn.textContent = 'Copiar tudo', 2500);
+  }
+}
+
+function closeModal() {
+  document.getElementById('exportModal').style.display = 'none';
+}
+</script>
+
+<!-- MODAL EXPORT -->
+<div id="exportModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.85);align-items:flex-end;justify-content:center;">
+  <div style="background:#1a1d27;border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <span style="font-family:'DM Sans',sans-serif;font-weight:700;color:#e8eaf6;font-size:16px;">📋 Dados exportados</span>
+      <button onclick="closeModal()" style="background:none;border:none;color:#6b7280;font-size:24px;cursor:pointer;padding:0 4px;">×</button>
+    </div>
+    <p style="font-family:'DM Sans',sans-serif;font-size:13px;color:#6b7280;margin-bottom:12px;">Toque em <strong style="color:#e8eaf6">Copiar tudo</strong> e cole no Notes, WhatsApp ou e-mail.</p>
+    <textarea id="exportText" readonly style="flex:1;min-height:200px;background:#0f1117;border:1.5px solid #2e3248;border-radius:10px;color:#38d9a9;font-family:monospace;font-size:11px;padding:14px;resize:none;outline:none;margin-bottom:14px;"></textarea>
+    <button id="copyBtn" onclick="copyExport()" style="width:100%;background:#4f7cff;border:none;border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;padding:16px;cursor:pointer;">Copiar tudo</button>
+  </div>
+</div>
+
+</body>
+</html>
