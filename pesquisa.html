@@ -584,6 +584,11 @@
     <div id="faixaChartArea"><p style="color:var(--muted);font-size:13px;text-align:center;padding:12px 0">Nenhum preço registrado na etapa 5</p></div>
   </div>
 
+  <div class="card" id="vivaverdeCard" style="display:none">
+    <div class="card-title">🌿 Viva!Verde — Share de Espaço</div>
+    <div id="vivaverdeArea"></div>
+  </div>
+
   <div class="card" id="resumoGondolas" style="display:none">
     <div class="card-title">🗂 Módulos</div>
     <div id="resumoGondolasBody"></div>
@@ -1001,6 +1006,58 @@ function calcFaixas() {
         </div>`).join('')}
       </div>`;
   }
+
+  // ── Viva!Verde share ───────────────────────────────────
+  let vvFrente = 0, vvPrat = 0, totalFrente = 0, totalPrat = 0;
+
+  document.querySelectorAll('#marcaFrenteList .marca-row').forEach(row => {
+    const sel = row.querySelector('.marca-sel');
+    const outra = row.querySelector('.outra-input');
+    const nome = (sel?.value === '__outra__' ? outra?.value : sel?.value) || '';
+    const nums = row.querySelectorAll('input[type=number]');
+    const f = parseFloat(nums[0]?.value) || 0;
+    const p = parseFloat(nums[1]?.value) || 0;
+    totalFrente += f;
+    totalPrat   += p;
+    if (nome.trim().toLowerCase().includes('viva') || nome.trim().toLowerCase().includes('verde')) {
+      vvFrente += f;
+      vvPrat   += p;
+    }
+  });
+
+  const vvCard = document.getElementById('vivaverdeCard');
+  const vvArea = document.getElementById('vivaverdeArea');
+  const totalCombinado = totalFrente + totalPrat;
+  const vvCombinado    = vvFrente + vvPrat;
+
+  if (totalCombinado > 0 && vvCard && vvArea) {
+    const pctVV = ((vvCombinado / totalCombinado) * 100).toFixed(1);
+    const pctFrente = totalFrente > 0 ? ((vvFrente / totalFrente) * 100).toFixed(1) : '0.0';
+    const pctPrat   = totalPrat   > 0 ? ((vvPrat   / totalPrat)   * 100).toFixed(1) : '0.0';
+    vvCard.style.display = 'block';
+    vvArea.innerHTML = `
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-family:'DM Mono',monospace;font-size:48px;font-weight:700;color:#38d9a9;line-height:1">${pctVV}%</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.08em">do espaço total da loja</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-family:'DM Mono',monospace;font-size:24px;font-weight:700;color:#4f7cff">${pctFrente}%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.06em">Frentes</div>
+          <div style="font-size:11px;color:var(--muted)">${vvFrente} de ${totalFrente}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-family:'DM Mono',monospace;font-size:24px;font-weight:700;color:#a78bfa">${pctPrat}%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.06em">Prateleiras</div>
+          <div style="font-size:11px;color:var(--muted)">${vvPrat} de ${totalPrat}</div>
+        </div>
+      </div>
+      <div style="height:12px;background:var(--border);border-radius:6px;overflow:hidden">
+        <div style="height:100%;width:${pctVV}%;background:linear-gradient(90deg,#38d9a9,#4f7cff);border-radius:6px;transition:width .7s ease"></div>
+      </div>`;
+  } else if (vvCard) {
+    vvCard.style.display = 'none';
+  }
 }
 
 // ── Select com opção livre ─────────────────────────────
@@ -1125,6 +1182,25 @@ function exportCSV() {
     csv += fxLabels[i] + ';' + v + ';' + pct + '\r\n';
   });
   csv += '\r\n';
+
+    // Viva!Verde share
+  let vvF = 0, vvP = 0, totF = 0, totP = 0;
+  document.querySelectorAll('#marcaFrenteList .marca-row').forEach(row => {
+    const sel = row.querySelector('.marca-sel');
+    const outra = row.querySelector('.outra-input');
+    const nome = (sel?.value === '__outra__' ? outra?.value : sel?.value) || '';
+    const nums = row.querySelectorAll('input[type=number]');
+    const f = parseFloat(nums[0]?.value)||0;
+    const p = parseFloat(nums[1]?.value)||0;
+    totF += f; totP += p;
+    if (nome.toLowerCase().includes('viva') || nome.toLowerCase().includes('verde')) { vvF += f; vvP += p; }
+  });
+  const totComb = totF + totP;
+  const vvComb  = vvF + vvP;
+  csv += 'VIVA!VERDE SHARE\r\nMetrica;Viva!Verde;Total;Percentual\r\n';
+  csv += 'Frentes;' + vvF + ';' + totF + ';' + (totF>0?((vvF/totF)*100).toFixed(1)+'%':'0%') + '\r\n';
+  csv += 'Prateleiras;' + vvP + ';' + totP + ';' + (totP>0?((vvP/totP)*100).toFixed(1)+'%':'0%') + '\r\n';
+  csv += 'Combinado;' + vvComb + ';' + totComb + ';' + (totComb>0?((vvComb/totComb)*100).toFixed(1)+'%':'0%') + '\r\n\r\n';
 
     const filename = 'pesquisa_' + rede + '_' + dataHoje + '.csv';
 
