@@ -501,12 +501,22 @@
     </div>
     <div class="row2">
       <div class="field">
-        <label>Cidade</label>
-        <input type="text" id="cidade" placeholder="São Paulo">
+        <label>UF</label>
+        <select id="uf" onchange="atualizarCidades()" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;padding:14px 16px;outline:none;-webkit-appearance:none;appearance:none;">
+          <option value="">UF…</option>
+          <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+          <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+          <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+          <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+          <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+          <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+          <option>SP</option><option>SE</option><option>TO</option>
+        </select>
       </div>
       <div class="field">
-        <label>UF</label>
-        <input type="text" id="uf" placeholder="SP" maxlength="2">
+        <label>Cidade</label>
+        <input type="text" id="cidade" placeholder="Digite ou selecione…" list="cidadesSugeridas" autocomplete="off">
+        <datalist id="cidadesSugeridas"></datalist>
       </div>
     </div>
     <div class="row2">
@@ -536,7 +546,6 @@
   <div class="section-label">Etapa 2</div>
   <div class="section-title">Gôndolas</div>
   <div id="gondolaList"></div>
-  <button class="add-btn" onclick="addGondola()">+ Adicionar Gôndola</button>
 </div>
 
 <!-- ══ SEÇÃO 3: TIPO DE AREIA ══ -->
@@ -576,7 +585,7 @@
   </div>
 
   <div class="card" id="resumoGondolas" style="display:none">
-    <div class="card-title">🗂 Gôndolas</div>
+    <div class="card-title">🗂 Módulos</div>
     <div id="resumoGondolasBody"></div>
   </div>
 </div>
@@ -612,16 +621,31 @@ function addTipoRow() {
   div.className = 'marca-row';
   div.id = id;
   div.innerHTML = `
-    <div class="tipo-row-top">
-      <input class="marca-nome-input" type="text" placeholder="Tipo de areia…" inputmode="text" style="flex:1">
-      <button class="del-btn" onclick="this.closest('.marca-row').remove()">×</button>
+    <div class="tipo-row-top" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Tipo de Areia</span>
+        <button class="del-btn" onclick="this.closest('.marca-row').remove()">×</button>
+      </div>
+      <select class="tipo-select" onchange="toggleOutra(this,'tipo')" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 12px;outline:none;-webkit-appearance:none;appearance:none;">
+          <option value="">Selecionar…</option>
+          <option>Bentonita</option>
+          <option>Diatomita</option>
+          <option>Madeira</option>
+          <option>Sílica</option>
+          <option>Sedimentos Vulcânicos</option>
+          <option>Milho e Mandioca</option>
+          <option>Mandioca</option>
+          <option>Extratos Vegetais</option>
+          <option value="__outra__">Outro tipo…</option>
+        </select>
+        <input type="text" class="outra-input marca-nome-input" placeholder="Digite o tipo…" style="display:none;width:100%;margin-top:8px;padding:10px 12px;font-size:14px">
     </div>
     <div class="tipo-row-metrics">
       <div>
         <div class="metric-label">Frentes</div>
         <div class="stepper">
           <button onclick="stepperChange('trf${id}',-1)">−</button>
-          <input type="number" id="trf${id}" value="0" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
+          <input type="number" id="trf${id}" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
           <button onclick="stepperChange('trf${id}',1)">+</button>
         </div>
       </div>
@@ -629,7 +653,7 @@ function addTipoRow() {
         <div class="metric-label">Prateleiras</div>
         <div class="stepper">
           <button onclick="stepperChange('trp${id}',-1)">−</button>
-          <input type="number" id="trp${id}" value="0" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
+          <input type="number" id="trp${id}" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
           <button onclick="stepperChange('trp${id}',1)">+</button>
         </div>
       </div>
@@ -646,8 +670,7 @@ function addGondola() {
   div.id = id;
   div.innerHTML = `
     <div class="gondola-header" onclick="toggleGondola('${id}')">
-      <span class="gondola-num">G${n}</span>
-      <span class="gondola-name">Gôndola ${n}</span>
+      <span class="gondola-name" style="font-size:15px;font-weight:700">Módulos</span>
       <span class="gondola-chevron">⌃</span>
     </div>
     <div class="gondola-body">
@@ -656,7 +679,7 @@ function addGondola() {
           <label>Módulos</label>
           <div class="stepper">
             <button onclick="stepperChange('mod${id}',-1)">−</button>
-            <input type="number" id="mod${id}" value="0" min="0" inputmode="numeric">
+            <input type="number" id="mod${id}" min="0" inputmode="numeric" placeholder="0">
             <button onclick="stepperChange('mod${id}',1)">+</button>
           </div>
         </div>
@@ -664,15 +687,12 @@ function addGondola() {
           <label>Prateleiras</label>
           <div class="stepper">
             <button onclick="stepperChange('prat${id}',-1)">−</button>
-            <input type="number" id="prat${id}" value="0" min="0" inputmode="numeric">
+            <input type="number" id="prat${id}" min="0" inputmode="numeric" placeholder="0">
             <button onclick="stepperChange('prat${id}',1)">+</button>
           </div>
         </div>
       </div>
-      <div class="field">
-        <label>Localização</label>
-        <input type="text" id="loc${id}" placeholder="Ex: Corredor 3, entrada…">
-      </div>
+
     </div>`;
   document.getElementById('gondolaList').appendChild(div);
 }
@@ -688,16 +708,64 @@ function addMarcaFrente() {
   div.className = 'marca-row';
   div.id = id;
   div.innerHTML = `
-    <div class="marca-row-top">
-      <input class="marca-nome-input" type="text" placeholder="Nome da marca…" inputmode="text" style="flex:1">
-      <button class="del-btn" onclick="this.closest('.marca-row').remove()">×</button>
+    <div class="marca-row-top" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Marca</span>
+        <button class="del-btn" onclick="this.closest('.marca-row').remove()">×</button>
+      </div>
+      <select class="marca-sel" onchange="toggleOutra(this,'marca')" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 12px;outline:none;-webkit-appearance:none;appearance:none;">
+          <option value="">Selecionar…</option>
+          <option>Akio</option>
+          <option>Alfa Pet (Kets)</option>
+          <option>American Pets</option>
+          <option>Bellogatto</option>
+          <option>Bem Me Pet</option>
+          <option>Bionature</option>
+          <option>Bpets</option>
+          <option>Cafuné</option>
+          <option>Cansei de Ser Gato</option>
+          <option>Cat Smart</option>
+          <option>Cat Zone</option>
+          <option>Cat's Best</option>
+          <option>Chalesco</option>
+          <option>DBest</option>
+          <option>Dinkos</option>
+          <option>Docg</option>
+          <option>Dr. Elsey's</option>
+          <option>Fresh Hygiene</option>
+          <option>Gattino</option>
+          <option>GermanHart</option>
+          <option>Great Pets</option>
+          <option>Ipet</option>
+          <option>Kadi</option>
+          <option>Katbom</option>
+          <option>Kelco (Pipicat)</option>
+          <option>Kets</option>
+          <option>Like Cat</option>
+          <option>Meau</option>
+          <option>Mimocat</option>
+          <option>My Hug</option>
+          <option>PeePoop</option>
+          <option>Perligatto</option>
+          <option>Petmais</option>
+          <option>Pipicat</option>
+          <option>ProGato</option>
+          <option>Purina (Tidy Cats)</option>
+          <option>Tidy Cats</option>
+          <option>Toi-Lex</option>
+          <option>Viva!Verde</option>
+          <option>WiCat</option>
+          <option>Wisecat</option>
+          <option value="__outra__">Outra marca…</option>
+        </select>
+        <input type="text" class="outra-input marca-nome-input" placeholder="Digite a marca…" style="display:none;width:100%;margin-top:8px;padding:10px 12px;font-size:14px">
     </div>
     <div class="marca-row-metrics">
       <div>
         <div class="metric-label">Frentes</div>
         <div class="stepper">
           <button onclick="stepperChange('mff${id}',-1)">−</button>
-          <input type="number" id="mff${id}" value="0" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
+          <input type="number" id="mff${id}" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
           <button onclick="stepperChange('mff${id}',1)">+</button>
         </div>
       </div>
@@ -705,7 +773,7 @@ function addMarcaFrente() {
         <div class="metric-label">Prateleiras</div>
         <div class="stepper">
           <button onclick="stepperChange('mfp${id}',-1)">−</button>
-          <input type="number" id="mfp${id}" value="0" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
+          <input type="number" id="mfp${id}" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
           <button onclick="stepperChange('mfp${id}',1)">+</button>
         </div>
       </div>
@@ -727,51 +795,99 @@ function addPrecoRow() {
     <div class="preco-row-top">
       <div>
         <div class="preco-label">Marca</div>
-        <input type="text" class="marca-nome-input" style="width:100%;padding:10px 12px;font-size:14px" placeholder="Marca…">
+        <select id="marca_${id}" class="marca-select" onchange="toggleMarcaOutra(this)" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 12px;outline:none;-webkit-appearance:none;appearance:none;">
+          <option value="">Selecionar…</option>
+          <option>Akio</option>
+          <option>Alfa Pet (Kets)</option>
+          <option>American Pets</option>
+          <option>Bellogatto</option>
+          <option>Bem Me Pet</option>
+          <option>Bionature</option>
+          <option>Bpets</option>
+          <option>Cafuné</option>
+          <option>Cansei de Ser Gato</option>
+          <option>Cat Smart</option>
+          <option>Cat Zone</option>
+          <option>Cat's Best</option>
+          <option>Chalesco</option>
+          <option>DBest</option>
+          <option>Dinkos</option>
+          <option>Docg</option>
+          <option>Dr. Elsey's</option>
+          <option>Fresh Hygiene</option>
+          <option>Gattino</option>
+          <option>GermanHart</option>
+          <option>Great Pets</option>
+          <option>Ipet</option>
+          <option>Kadi</option>
+          <option>Katbom</option>
+          <option>Kelco (Pipicat)</option>
+          <option>Kets</option>
+          <option>Like Cat</option>
+          <option>Meau</option>
+          <option>Mimocat</option>
+          <option>My Hug</option>
+          <option>PeePoop</option>
+          <option>Perligatto</option>
+          <option>Petmais</option>
+          <option>Pipicat</option>
+          <option>ProGato</option>
+          <option>Purina (Tidy Cats)</option>
+          <option>Tidy Cats</option>
+          <option>Toi-Lex</option>
+          <option>Viva!Verde</option>
+          <option>WiCat</option>
+          <option>Wisecat</option>
+          <option value="__outra__">Outra marca…</option>
+        </select>
+        <input type="text" id="marca_outra_${id}" class="marca-outra-input marca-nome-input" placeholder="Digite o nome da marca…" style="display:none;width:100%;margin-top:8px;padding:10px 12px;font-size:14px">
       </div>
-
+      <div>
+        <div class="preco-label">Tipo de Areia</div>
+        <select id="tipo_${id}" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 12px;outline:none;-webkit-appearance:none;appearance:none;">
+          <option value="">Selecionar…</option>
+          <option>Bentonita</option>
+          <option>Diatomita</option>
+          <option>Madeira</option>
+          <option>Sílica</option>
+          <option>Sedimentos Vulcânicos</option>
+          <option>Milho e Mandioca</option>
+          <option>Mandioca</option>
+          <option>Extratos Vegetais</option>
+          <option>Outros</option>
+        </select>
+      </div>
     </div>
     <div class="preco-row-bot">
       <div>
         <div class="preco-label">Preço Tabela</div>
-        <input type="number" class="preco-input preco-tabela" placeholder="0,00" step="0.01" inputmode="decimal">
+        <input type="number" id="ptab_${id}" placeholder="0,00" step="0.01" inputmode="decimal" class="preco-input preco-tabela" oninput="calcKgFromRow(this)">
       </div>
       <div>
         <div class="preco-label">Preço Promo</div>
-        <input type="number" class="preco-input promo" placeholder="0,00" step="0.01" inputmode="decimal">
+        <input type="number" id="ppro_${id}" placeholder="0,00" step="0.01" inputmode="decimal" class="preco-input promo">
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
       <div>
         <div class="preco-label">Qtd kg (SKU)</div>
-        <input type="number" class="preco-input sku-kg" placeholder="ex: 1,5" step="0.01" min="0" inputmode="decimal" style="color:var(--accent2)">
+        <input type="number" id="pkg_${id}" placeholder="ex: 1,5" step="0.01" min="0" inputmode="decimal" class="preco-input sku-kg" style="color:var(--accent2)" oninput="calcKgFromRow(this)">
       </div>
       <div>
         <div class="preco-label">Preço / kg</div>
-        <input type="number" class="preco-input preco-kg-calc" placeholder="—" step="0.01" readonly style="color:var(--accent);opacity:0.8;cursor:default">
+        <input type="number" id="pcalc_${id}" placeholder="—" step="0.01" readonly class="preco-input preco-kg-calc" style="color:var(--accent);opacity:0.8;cursor:default">
       </div>
     </div>`;
 
-  // Auto-calcular preço/kg ao digitar preço tabela ou kg
-  setTimeout(() => {
-    const row = document.getElementById(id);
-    const ptab = row.querySelector('.preco-tabela');
-    const pkg  = row.querySelector('.sku-kg');
-    const calc = row.querySelector('.preco-kg-calc');
-    function updatePrecoPorKg() {
-      const preco = parseFloat(ptab.value) || 0;
-      const kg    = parseFloat(pkg.value)  || 0;
-      if (preco > 0 && kg > 0) {
-        calc.value = (preco / kg).toFixed(2);
-      } else {
-        calc.value = '';
-      }
-    }
-    ptab.addEventListener('input', updatePrecoPorKg);
-    pkg.addEventListener('input', updatePrecoPorKg);
-  }, 50);
-
   document.getElementById('precoList').appendChild(div);
+}
+
+function calcKgFromRow(input) {
+  const row  = input.closest('.preco-row');
+  const ptab = parseFloat(row.querySelector('.preco-tabela')?.value) || 0;
+  const kg   = parseFloat(row.querySelector('.sku-kg')?.value) || 0;
+  const calc = row.querySelector('.preco-kg-calc');
+  if (calc) calc.value = (ptab > 0 && kg > 0) ? (ptab / kg).toFixed(2) : '';
 }
 
 // ── Stepper ────────────────────────────────────────────
@@ -781,12 +897,11 @@ function stepperChange(id, delta) {
   const step = parseFloat(el.step) || 1;
   const current = parseFloat(el.value) || 0;
   let val = Math.max(0, current + delta);
-  // Se o input suporta decimais, arredonda para 2 casas
   if (step < 1) {
     val = Math.round(val * 100) / 100;
-    el.value = val.toFixed(2);
+    el.value = val > 0 ? val : '';
   } else {
-    el.value = Math.round(val);
+    el.value = Math.round(val) > 0 ? Math.round(val) : '';
   }
 }
 
@@ -827,7 +942,6 @@ function calcFaixas() {
   rows.forEach(row => {
     const ptab = parseFloat(row.querySelector('.preco-tabela')?.value) || 0;
     const kg   = parseFloat(row.querySelector('.sku-kg')?.value) || 0;
-    // Se tiver kg preenchido, usa preço/kg; senão usa preço tabela direto
     const preco = (ptab > 0 && kg > 0) ? ptab / kg : ptab;
     if (preco <= 0) return;
     if      (preco <= 5)  counts[0]++;
@@ -889,6 +1003,49 @@ function calcFaixas() {
   }
 }
 
+// ── Select com opção livre ─────────────────────────────
+function toggleOutra(sel, tipo) {
+  const container = sel.parentElement;
+  const input = container.querySelector('.outra-input');
+  if (!input) return;
+  if (sel.value === '__outra__') {
+    input.style.display = 'block';
+    input.focus();
+  } else {
+    input.style.display = 'none';
+    input.value = '';
+  }
+}
+
+function getSelectValue(container) {
+  const sel = container.querySelector('select');
+  if (sel && sel.value === '__outra__') {
+    return container.querySelector('.outra-input')?.value || '';
+  }
+  return sel?.value || '';
+}
+
+// ── Marca Outra ────────────────────────────────────────
+function toggleMarcaOutra(sel) {
+  const row = sel.closest('.preco-row');
+  const outraInput = row.querySelector('.marca-outra-input');
+  if (sel.value === '__outra__') {
+    outraInput.style.display = 'block';
+    outraInput.focus();
+  } else {
+    outraInput.style.display = 'none';
+    outraInput.value = '';
+  }
+}
+
+function getMarcaValue(row) {
+  const sel = row.querySelector('.marca-select');
+  if (sel && sel.value === '__outra__') {
+    return row.querySelector('.marca-outra-input')?.value || '';
+  }
+  return sel?.value || '';
+}
+
 // ── Export CSV ─────────────────────────────────────────
 function exportCSV() {
   const dataHoje = document.getElementById('data').value || new Date().toISOString().slice(0,10);
@@ -903,21 +1060,20 @@ function exportCSV() {
   csv += 'Data;' + dataHoje + '\r\n';
   csv += 'Pesquisador;' + (document.getElementById('pesquisador').value||'') + '\r\n\r\n';
 
-  // Gôndolas
-  csv += 'GONDOLAS\r\nGondola;Localizacao;Modulos;Prateleiras\r\n';
+  // Módulos
+  csv += 'GONDOLAS\r\nModulo;Modulos;Prateleiras\r\n';
   document.querySelectorAll('.gondola-block').forEach((g,i) => {
     const id = g.id;
-    const loc  = (g.querySelector('[id^="loc"]')?.value  || '').replace(/;/g,',');
     const mod  =  g.querySelector('[id^="mod"]')?.value  || 0;
     const prat =  g.querySelector('[id^="prat"]')?.value || 0;
-    csv += 'Gondola ' + (i+1) + ';' + loc + ';' + mod + ';' + prat + '\r\n';
+    csv += 'Gondola ' + (i+1) + ';' + mod + ';' + prat + '\r\n';
   });
   csv += '\r\n';
 
   // Tipos
   csv += 'FRENTES E PRATELEIRAS POR TIPO\r\nTipo;Frentes;Prateleiras\r\n';
   document.querySelectorAll('#tipoList .marca-row').forEach(row => {
-    const nome = row.querySelector('.marca-nome-input')?.value || '';
+    const nome = getSelectValue(row.querySelector('.tipo-row-top'));
     const nums = row.querySelectorAll('input[type=number]');
     const frentes = nums[0]?.value || 0;
     const prat    = nums[1]?.value || 0;
@@ -928,7 +1084,7 @@ function exportCSV() {
   // Marcas frentes
   csv += 'FRENTES E PRATELEIRAS POR MARCA\r\nMarca;Frentes;Prateleiras\r\n';
   document.querySelectorAll('#marcaFrenteList .marca-row').forEach(row => {
-    const nome = row.querySelector('.marca-nome-input')?.value || '';
+    const nome = getSelectValue(row.querySelector('.marca-row-top'));
     const nums = row.querySelectorAll('input[type=number]');
     const frentes = nums[0]?.value || 0;
     const prat    = nums[1]?.value || 0;
@@ -937,15 +1093,16 @@ function exportCSV() {
   csv += '\r\n';
 
   // Preços
-  csv += 'MARCA E PRECO\r\nMarca;Preco Tabela;Preco Promo;Qtd kg;Preco por kg\r\n';
+  csv += 'MARCA E PRECO\r\nMarca;Tipo Areia;Preco Tabela;Preco Promo;Qtd kg;Preco por kg\r\n';
   document.querySelectorAll('#precoList .preco-row').forEach(row => {
-    const textos = row.querySelectorAll('input[type=text]');
-    const marca  = (textos[0]?.value||'').replace(/;/g,',');
-    const ptab   = row.querySelector('.preco-tabela')?.value || '';
-    const ppro   = row.querySelector('.promo')?.value || '';
-    const skg    = row.querySelector('.sku-kg')?.value || '';
-    const pkg    = row.querySelector('.preco-kg-calc')?.value || '';
-    if (marca.trim()) csv += marca+';'+ptab+';'+ppro+';'+skg+';'+pkg+'\r\n';
+    const marca = getMarcaValue(row).replace(/;/g,',');
+    const selects = row.querySelectorAll('select');
+    const tipo  = (selects[1]?.value||'').replace(/;/g,',');
+    const ptab  = row.querySelector('.preco-tabela')?.value || '';
+    const ppro  = row.querySelector('.promo')?.value || '';
+    const skg   = row.querySelector('.sku-kg')?.value || '';
+    const pkg   = row.querySelector('.preco-kg-calc')?.value || '';
+    if (marca.trim()) csv += marca+';'+tipo+';'+ptab+';'+ppro+';'+skg+';'+pkg+'\r\n';
   });
 
   // Faixa Preço/kg — calculada da etapa 5
@@ -1007,6 +1164,52 @@ function copyExport() {
     btn.textContent = '✓ Copiado!';
     setTimeout(() => btn.textContent = 'Copiar tudo', 2500);
   }
+}
+
+
+// ── Cidades por UF ─────────────────────────────────────
+const cidadesPorUF = {
+  AC: ['Rio Branco','Cruzeiro do Sul','Sena Madureira','Tarauacá','Feijó'],
+  AL: ['Maceió','Arapiraca','Palmeira dos Índios','Rio Largo','Penedo','União dos Palmares','São Miguel dos Campos'],
+  AP: ['Macapá','Santana','Laranjal do Jari','Oiapoque','Mazagão'],
+  AM: ['Manaus','Parintins','Itacoatiara','Manacapuru','Coari','Tefé','Tabatinga','Maués'],
+  BA: ['Salvador','Feira de Santana','Vitória da Conquista','Camaçari','Juazeiro','Petrolina','Lauro de Freitas','Ilhéus','Jequié','Teixeira de Freitas','Barreiras','Porto Seguro'],
+  CE: ['Fortaleza','Caucaia','Juazeiro do Norte','Maracanaú','Sobral','Crato','Itapipoca','Maranguape','Iguatu','Quixadá'],
+  DF: ['Brasília','Taguatinga','Ceilândia','Samambaia','Planaltina','Gama','Sobradinho'],
+  ES: ['Vitória','Vila Velha','Serra','Cariacica','Linhares','Cachoeiro de Itapemirim','Colatina','Guarapari','São Mateus'],
+  GO: ['Goiânia','Aparecida de Goiânia','Anápolis','Rio Verde','Luziânia','Águas Lindas de Goiás','Valparaíso de Goiás','Trindade','Formosa','Novo Gama','Catalão'],
+  MA: ['São Luís','Imperatriz','São José de Ribamar','Timon','Caxias','Codó','Paço do Lumiar','Açailândia','Bacabal','Balsas'],
+  MT: ['Cuiabá','Várzea Grande','Rondonópolis','Sinop','Tangará da Serra','Cáceres','Sorriso','Lucas do Rio Verde','Primavera do Leste'],
+  MS: ['Campo Grande','Dourados','Três Lagoas','Corumbá','Grande Dourados','Ponta Porã','Naviraí','Novo Horizonte do Sul'],
+  MG: ['Belo Horizonte','Uberlândia','Contagem','Juiz de Fora','Betim','Montes Claros','Ribeirão das Neves','Uberaba','Governador Valadares','Ipatinga','Sete Lagoas','Divinópolis','Santa Luzia','Ibirité','Poços de Caldas','Patos de Minas','Pouso Alegre','Teófilo Otoni','Barbacena','Sabará'],
+  PA: ['Belém','Ananindeua','Santarém','Marabá','Castanhal','Parauapebas','Abaetetuba','Cametá','Altamira','Tucuruí'],
+  PB: ['João Pessoa','Campina Grande','Santa Rita','Patos','Bayeux','Sousa','Cajazeiras','Cabedelo'],
+  PR: ['Curitiba','Londrina','Maringá','Ponta Grossa','Cascavel','São José dos Pinhais','Foz do Iguaçu','Colombo','Guarapuava','Paranaguá','Araucária','Toledo','Apucarana','Pinhais','Campo Largo'],
+  PE: ['Recife','Caruaru','Petrolina','Olinda','Paulista','Jaboatão dos Guararapes','Cabo de Santo Agostinho','Camaragibe','Garanhuns','Vitória de Santo Antão','Igarassu','Santa Cruz do Capibaribe'],
+  PI: ['Teresina','Parnaíba','Picos','Piripiri','Floriano','Campo Maior'],
+  RJ: ['Rio de Janeiro','São Gonçalo','Duque de Caxias','Nova Iguaçu','Niterói','Belford Roxo','São João de Meriti','Campos dos Goytacazes','Petrópolis','Volta Redonda','Magé','Itaboraí','Macaé','Cabo Frio','Nova Friburgo','Barra Mansa','Angra dos Reis'],
+  RN: ['Natal','Mossoró','Parnamirim','São Gonçalo do Amarante','Macaíba','Ceará-Mirim','Caicó','Assu'],
+  RS: ['Porto Alegre','Caxias do Sul','Pelotas','Canoas','Santa Maria','Gravataí','Viamão','Novo Hamburgo','São Leopoldo','Rio Grande','Alvorada','Passo Fundo','Sapucaia do Sul','Uruguaiana','Santa Cruz do Sul','Cachoeirinha','Bagé','Bento Gonçalves','Erechim'],
+  RO: ['Porto Velho','Ji-Paraná','Ariquemes','Vilhena','Cacoal','Rolim de Moura','Guajará-Mirim'],
+  RR: ['Boa Vista','Caracaraí','Rorainópolis'],
+  SC: ['Florianópolis','Joinville','Blumenau','São José','Criciúma','Chapecó','Itajaí','Jaraguá do Sul','Palhoça','Lages','Balneário Camboriú','Brusque','Tubarão','Içara','São Bento do Sul'],
+  SP: ['São Paulo','Guarulhos','Campinas','São Bernardo do Campo','Santo André','Osasco','São José dos Campos','Ribeirão Preto','Sorocaba','Mauá','São José do Rio Preto','Mogi das Cruzes','Santos','Diadema','Jundiaí','Piracicaba','Carapicuíba','Bauru','Itaquaquecetuba','São Vicente','Franca','Guarujá','Taubaté','Praia Grande','Limeira','Suzano','Taboão da Serra','Sumaré','Barueri','Embu das Artes','São Carlos','Indaiatuba','Cotia','Marília','São Paulo','Americana','Jacareí','Araraquara','Hortolândia','Presidente Prudente'],
+  SE: ['Aracaju','Nossa Senhora do Socorro','Lagarto','Itabaiana','Caruaru','São Cristóvão','Estância','Tobias Barreto'],
+  TO: ['Palmas','Araguaína','Gurupi','Porto Nacional','Paraíso do Tocantins','Colinas do Tocantins'],
+};
+
+function atualizarCidades() {
+  const uf = document.getElementById('uf').value;
+  const dl = document.getElementById('cidadesSugeridas');
+  const cidadeInput = document.getElementById('cidade');
+  dl.innerHTML = '';
+  cidadeInput.value = '';
+  if (!uf || !cidadesPorUF[uf]) return;
+  cidadesPorUF[uf].forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    dl.appendChild(opt);
+  });
 }
 
 function closeModal() {
