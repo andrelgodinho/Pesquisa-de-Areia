@@ -731,21 +731,48 @@ function addPrecoRow() {
         <div class="preco-label">Marca</div>
         <input type="text" class="marca-nome-input" style="width:100%;padding:10px 12px;font-size:14px" placeholder="Marca…">
       </div>
-      <div>
-        <div class="preco-label">Produto / SKU</div>
-        <input type="text" class="marca-nome-input" style="width:100%;padding:10px 12px;font-size:14px" placeholder="Descrição…">
-      </div>
+
     </div>
     <div class="preco-row-bot">
       <div>
         <div class="preco-label">Preço Tabela</div>
-        <input type="number" class="preco-input" placeholder="0,00" step="0.01" inputmode="decimal">
+        <input type="number" class="preco-input preco-tabela" placeholder="0,00" step="0.01" inputmode="decimal">
       </div>
       <div>
         <div class="preco-label">Preço Promo</div>
         <input type="number" class="preco-input promo" placeholder="0,00" step="0.01" inputmode="decimal">
       </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div>
+        <div class="preco-label">Qtd kg (SKU)</div>
+        <input type="number" class="preco-input sku-kg" placeholder="ex: 1,5" step="0.01" min="0" inputmode="decimal" style="color:var(--accent2)">
+      </div>
+      <div>
+        <div class="preco-label">Preço / kg</div>
+        <input type="number" class="preco-input preco-kg-calc" placeholder="—" step="0.01" readonly style="color:var(--accent);opacity:0.8;cursor:default">
+      </div>
     </div>`;
+
+  // Auto-calcular preço/kg ao digitar preço tabela ou kg
+  setTimeout(() => {
+    const row = document.getElementById(id);
+    const ptab = row.querySelector('.preco-tabela');
+    const pkg  = row.querySelector('.sku-kg');
+    const calc = row.querySelector('.preco-kg-calc');
+    function updatePrecoPorKg() {
+      const preco = parseFloat(ptab.value) || 0;
+      const kg    = parseFloat(pkg.value)  || 0;
+      if (preco > 0 && kg > 0) {
+        calc.value = (preco / kg).toFixed(2);
+      } else {
+        calc.value = '';
+      }
+    }
+    ptab.addEventListener('input', updatePrecoPorKg);
+    pkg.addEventListener('input', updatePrecoPorKg);
+  }, 50);
+
   document.getElementById('precoList').appendChild(div);
 }
 
@@ -800,9 +827,10 @@ function calcFaixas() {
   const counts = [0, 0, 0, 0]; // faixas: 1-5, 5-10, 10-15, >15
 
   rows.forEach(row => {
-    const nums = row.querySelectorAll('input[type=number]');
-    // primeiro input numérico é Preço Tabela
-    const preco = parseFloat(nums[0]?.value) || 0;
+    const ptab = parseFloat(row.querySelector('.preco-tabela')?.value) || 0;
+    const kg   = parseFloat(row.querySelector('.sku-kg')?.value) || 0;
+    // Se tiver kg preenchido, usa preço/kg; senão usa preço tabela direto
+    const preco = (ptab > 0 && kg > 0) ? ptab / kg : ptab;
     if (preco <= 0) return;
     if      (preco <= 5)  counts[0]++;
     else if (preco <= 10) counts[1]++;
@@ -911,22 +939,23 @@ function exportCSV() {
   csv += '\r\n';
 
   // Preços
-  csv += 'MARCA E PRECO\r\nMarca;Produto SKU;Preco Tabela;Preco Promo\r\n';
+  csv += 'MARCA E PRECO\r\nMarca;Preco Tabela;Preco Promo;Qtd kg;Preco por kg\r\n';
   document.querySelectorAll('#precoList .preco-row').forEach(row => {
     const textos = row.querySelectorAll('input[type=text]');
-    const nums   = row.querySelectorAll('input[type=number]');
     const marca  = (textos[0]?.value||'').replace(/;/g,',');
-    const sku    = (textos[1]?.value||'').replace(/;/g,',');
-    const ptab   = nums[0]?.value || '';
-    const ppro   = nums[1]?.value || '';
-    if (marca.trim() || sku.trim()) csv += marca+';'+sku+';'+ptab+';'+ppro+'\r\n';
+    const ptab   = row.querySelector('.preco-tabela')?.value || '';
+    const ppro   = row.querySelector('.promo')?.value || '';
+    const skg    = row.querySelector('.sku-kg')?.value || '';
+    const pkg    = row.querySelector('.preco-kg-calc')?.value || '';
+    if (marca.trim()) csv += marca+';'+ptab+';'+ppro+';'+skg+';'+pkg+'\r\n';
   });
 
   // Faixa Preço/kg — calculada da etapa 5
   const fxCounts = [0,0,0,0];
   document.querySelectorAll('#precoList .preco-row').forEach(row => {
-    const nums = row.querySelectorAll('input[type=number]');
-    const p = parseFloat(nums[0]?.value)||0;
+    const ptab = parseFloat(row.querySelector('.preco-tabela')?.value)||0;
+    const kg   = parseFloat(row.querySelector('.sku-kg')?.value)||0;
+    const p = (ptab > 0 && kg > 0) ? ptab / kg : ptab;
     if (p<=0) return;
     if      (p<=5)  fxCounts[0]++;
     else if (p<=10) fxCounts[1]++;
