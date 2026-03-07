@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Pesquisa de Gôndola</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Josefin+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0f1117;
@@ -263,8 +263,13 @@
     padding: 14px 16px;
     margin-bottom: 10px;
     display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .tipo-row-top, .marca-row-top {
+    display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
   }
   .tipo-nome, .marca-nome-label {
     font-size: 14px;
@@ -275,6 +280,34 @@
   .tipo-row .stepper, .marca-row .stepper {
     width: 130px;
     flex-shrink: 0;
+  }
+  .tipo-row-metrics, .marca-row-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .metric-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .tipo-row-metrics .stepper,
+  .marca-row-metrics .stepper {
+    width: 100% !important;
+  }
+  .tipo-row-metrics .stepper button,
+  .marca-row-metrics .stepper button {
+    width: 64px;
+    height: 60px;
+    font-size: 26px;
+  }
+  .tipo-row-metrics .stepper input,
+  .marca-row-metrics .stepper input {
+    height: 60px;
+    font-size: 24px;
   }
   .marca-nome-input {
     flex: 1;
@@ -433,6 +466,19 @@
     text-transform: uppercase;
     letter-spacing: .06em;
   }
+
+  /* ── RESUMO JOSEFIN SANS ── */
+  #sec6 {
+    font-family: 'Josefin Sans', sans-serif !important;
+  }
+  #sec6 .section-label,
+  #sec6 .section-title,
+  #sec6 .card-title,
+  #sec6 .card,
+  #sec6 span,
+  #sec6 div {
+    font-family: 'Josefin Sans', sans-serif !important;
+  }
 </style>
 </head>
 <body>
@@ -498,7 +544,7 @@
 <!-- ══ SEÇÃO 3: TIPO DE AREIA ══ -->
 <div class="section" id="sec3">
   <div class="section-label">Etapa 3</div>
-  <div class="section-title">Frentes por<br>Tipo de Areia</div>
+  <div class="section-title">Frentes e Prateleiras<br>por Tipo de Areia</div>
   <div id="tipoList"></div>
   <button class="add-btn" onclick="addTipoRow()">+ Adicionar Tipo</button>
 </div>
@@ -506,7 +552,7 @@
 <!-- ══ SEÇÃO 4: MARCA ══ -->
 <div class="section" id="sec4">
   <div class="section-label">Etapa 4</div>
-  <div class="section-title">Frentes por<br>Marca</div>
+  <div class="section-title">Frentes e Prateleiras<br>por Marca</div>
   <div id="marcaFrenteList"></div>
   <button class="add-btn" onclick="addMarcaFrente()">+ Adicionar Marca</button>
 </div>
@@ -519,6 +565,24 @@
   <button class="add-btn" onclick="addPrecoRow()">+ Adicionar SKU</button>
 </div>
 
+<!-- ══ SEÇÃO 6: RESUMO ══ -->
+<div class="section" id="sec6">
+  <div class="section-label">Etapa 6</div>
+  <div class="section-title">Resumo da<br>Pesquisa</div>
+
+  <div class="card" id="resumoLoja"></div>
+
+  <div class="card">
+    <div class="card-title">📊 Exposição por Faixa de Preço/kg</div>
+    <div id="faixaChartArea"><p style="color:var(--muted);font-size:13px;text-align:center;padding:12px 0">Nenhum preço registrado na etapa 5</p></div>
+  </div>
+
+  <div class="card" id="resumoGondolas" style="display:none">
+    <div class="card-title">🗂 Gôndolas</div>
+    <div id="resumoGondolasBody"></div>
+  </div>
+</div>
+
 <!-- ══ NAV BAR ══ -->
 <div class="nav-bar">
   <button class="btn btn-back" id="btnBack" onclick="goBack()" style="display:none">←</button>
@@ -529,7 +593,7 @@
 <script>
 // ── State ──────────────────────────────────────────────
 let currentStep = 1;
-const totalSteps = 5;
+const totalSteps = 6;
 
 // ── Init ───────────────────────────────────────────────
 document.getElementById('data').valueAsDate = new Date();
@@ -550,13 +614,28 @@ function addTipoRow() {
   div.className = 'marca-row';
   div.id = id;
   div.innerHTML = `
-    <input class="marca-nome-input" type="text" placeholder="Tipo de areia…" inputmode="text">
-    <div class="stepper" style="width:130px">
-      <button onclick="stepperChange('trq${id}',-1)">−</button>
-      <input type="number" id="trq${id}" value="0" min="0" inputmode="numeric">
-      <button onclick="stepperChange('trq${id}',1)">+</button>
+    <div class="tipo-row-top">
+      <input class="marca-nome-input" type="text" placeholder="Tipo de areia…" inputmode="text" style="flex:1">
+      <button class="del-btn" onclick="this.closest('.marca-row').remove()">×</button>
     </div>
-    <button class="del-btn" onclick="this.closest('.marca-row').remove()">×</button>`;
+    <div class="tipo-row-metrics">
+      <div>
+        <div class="metric-label">Frentes</div>
+        <div class="stepper">
+          <button onclick="stepperChange('trf${id}',-1)">−</button>
+          <input type="number" id="trf${id}" value="0" min="0" inputmode="numeric">
+          <button onclick="stepperChange('trf${id}',1)">+</button>
+        </div>
+      </div>
+      <div>
+        <div class="metric-label">Prateleiras</div>
+        <div class="stepper">
+          <button onclick="stepperChange('trp${id}',-1)">−</button>
+          <input type="number" id="trp${id}" value="0" min="0" inputmode="numeric">
+          <button onclick="stepperChange('trp${id}',1)">+</button>
+        </div>
+      </div>
+    </div>`;
   document.getElementById('tipoList').appendChild(div);
 }
 
@@ -611,13 +690,28 @@ function addMarcaFrente() {
   div.className = 'marca-row';
   div.id = id;
   div.innerHTML = `
-    <input class="marca-nome-input" type="text" placeholder="Nome da marca…" inputmode="text">
-    <div class="stepper" style="width:130px">
-      <button onclick="stepperChange('mfq${id}',-1)">−</button>
-      <input type="number" id="mfq${id}" value="0" min="0" inputmode="numeric">
-      <button onclick="stepperChange('mfq${id}',1)">+</button>
+    <div class="marca-row-top">
+      <input class="marca-nome-input" type="text" placeholder="Nome da marca…" inputmode="text" style="flex:1">
+      <button class="del-btn" onclick="this.closest('.marca-row').remove()">×</button>
     </div>
-    <button class="del-btn" onclick="this.closest('.marca-row').remove()">×</button>`;
+    <div class="marca-row-metrics">
+      <div>
+        <div class="metric-label">Frentes</div>
+        <div class="stepper">
+          <button onclick="stepperChange('mff${id}',-1)">−</button>
+          <input type="number" id="mff${id}" value="0" min="0" inputmode="numeric">
+          <button onclick="stepperChange('mff${id}',1)">+</button>
+        </div>
+      </div>
+      <div>
+        <div class="metric-label">Prateleiras</div>
+        <div class="stepper">
+          <button onclick="stepperChange('mfp${id}',-1)">−</button>
+          <input type="number" id="mfp${id}" value="0" min="0" inputmode="numeric">
+          <button onclick="stepperChange('mfp${id}',1)">+</button>
+        </div>
+      </div>
+    </div>`;
   document.getElementById('marcaFrenteList').appendChild(div);
 }
 
@@ -688,6 +782,77 @@ function updateUI() {
   document.getElementById('btnNext').style.display = currentStep < totalSteps ? 'block' : 'none';
   document.getElementById('btnSave').style.display = currentStep === totalSteps ? 'block' : 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (currentStep === totalSteps) calcFaixas();
+}
+
+// ── Faixa Preço/kg — calculada a partir da etapa 5 ────
+function calcFaixas() {
+  // Lê todos os preços de tabela informados na etapa 5
+  const rows = document.querySelectorAll('#precoList .preco-row');
+  const counts = [0, 0, 0, 0]; // faixas: 1-5, 5-10, 10-15, >15
+
+  rows.forEach(row => {
+    const nums = row.querySelectorAll('input[type=number]');
+    // primeiro input numérico é Preço Tabela
+    const preco = parseFloat(nums[0]?.value) || 0;
+    if (preco <= 0) return;
+    if      (preco <= 5)  counts[0]++;
+    else if (preco <= 10) counts[1]++;
+    else if (preco <= 15) counts[2]++;
+    else                  counts[3]++;
+  });
+
+  const total = counts.reduce((a,b) => a+b, 0);
+  const area = document.getElementById('faixaChartArea');
+
+  if (total === 0) {
+    area.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:12px 0">Nenhum preço registrado na etapa 5</p>';
+    return;
+  }
+
+  const faixas = [
+    { label:'R$ 1,00 – 5,00/kg',  val:counts[0], color:'#4f7cff' },
+    { label:'R$ 5,01 – 10,00/kg', val:counts[1], color:'#38d9a9' },
+    { label:'R$ 10,01 – 15,00/kg',val:counts[2], color:'#ff7c4f' },
+    { label:'Acima de R$ 15,00/kg',val:counts[3], color:'#a78bfa' },
+  ];
+
+  let html = '';
+  faixas.forEach(f => {
+    const pct = ((f.val / total) * 100).toFixed(1);
+    html += `
+    <div style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${f.label}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:${f.color}">${pct}%</span>
+      </div>
+      <div style="height:12px;background:var(--border);border-radius:6px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${f.color};border-radius:6px;transition:width .7s ease"></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${f.val} SKU${f.val!==1?'s':''} de ${total} total</div>
+    </div>`;
+  });
+  area.innerHTML = html;
+
+  // Resumo loja
+  const resumo = document.getElementById('resumoLoja');
+  if (resumo) {
+    const rede = document.getElementById('rede')?.value || '—';
+    const cidade = document.getElementById('cidade')?.value || '—';
+    const uf = document.getElementById('uf')?.value || '';
+    const canal = document.getElementById('canal')?.value || '—';
+    const data = document.getElementById('data')?.value || '—';
+    const pesq = document.getElementById('pesquisador')?.value || '—';
+    resumo.innerHTML = `
+      <div class="card-title">📋 Identificação</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${[['Rede',rede],['Canal',canal],['Cidade',cidade+(uf?' – '+uf:'')],['Data',data],['Pesquisador',pesq]].map(([k,v])=>`
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px">${k}</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">${v||'—'}</div>
+        </div>`).join('')}
+      </div>`;
+  }
 }
 
 // ── Export CSV ─────────────────────────────────────────
@@ -716,20 +881,24 @@ function exportCSV() {
   csv += '\r\n';
 
   // Tipos
-  csv += 'FRENTES POR TIPO\r\nTipo;Frentes\r\n';
+  csv += 'FRENTES E PRATELEIRAS POR TIPO\r\nTipo;Frentes;Prateleiras\r\n';
   document.querySelectorAll('#tipoList .marca-row').forEach(row => {
     const nome = row.querySelector('.marca-nome-input')?.value || '';
-    const qtd  = row.querySelector('input[type=number]')?.value || 0;
-    if (nome.trim()) csv += nome.replace(/;/g,',') + ';' + qtd + '\r\n';
+    const nums = row.querySelectorAll('input[type=number]');
+    const frentes = nums[0]?.value || 0;
+    const prat    = nums[1]?.value || 0;
+    if (nome.trim()) csv += nome.replace(/;/g,',') + ';' + frentes + ';' + prat + '\r\n';
   });
   csv += '\r\n';
 
   // Marcas frentes
-  csv += 'FRENTES POR MARCA\r\nMarca;Frentes\r\n';
+  csv += 'FRENTES E PRATELEIRAS POR MARCA\r\nMarca;Frentes;Prateleiras\r\n';
   document.querySelectorAll('#marcaFrenteList .marca-row').forEach(row => {
     const nome = row.querySelector('.marca-nome-input')?.value || '';
-    const qtd  = row.querySelector('input[type=number]')?.value || 0;
-    if (nome.trim()) csv += nome.replace(/;/g,',') + ';' + qtd + '\r\n';
+    const nums = row.querySelectorAll('input[type=number]');
+    const frentes = nums[0]?.value || 0;
+    const prat    = nums[1]?.value || 0;
+    if (nome.trim()) csv += nome.replace(/;/g,',') + ';' + frentes + ';' + prat + '\r\n';
   });
   csv += '\r\n';
 
@@ -745,7 +914,27 @@ function exportCSV() {
     if (marca.trim() || sku.trim()) csv += marca+';'+sku+';'+ptab+';'+ppro+'\r\n';
   });
 
-  const filename = 'pesquisa_' + rede + '_' + dataHoje + '.csv';
+  // Faixa Preço/kg — calculada da etapa 5
+  const fxCounts = [0,0,0,0];
+  document.querySelectorAll('#precoList .preco-row').forEach(row => {
+    const nums = row.querySelectorAll('input[type=number]');
+    const p = parseFloat(nums[0]?.value)||0;
+    if (p<=0) return;
+    if      (p<=5)  fxCounts[0]++;
+    else if (p<=10) fxCounts[1]++;
+    else if (p<=15) fxCounts[2]++;
+    else            fxCounts[3]++;
+  });
+  const fxSum = fxCounts.reduce((a,b)=>a+b,0);
+  const fxLabels = ['R$1-5/kg','R$5-10/kg','R$10-15/kg','>R$15/kg'];
+  csv += 'FAIXA DE PRECO POR KG\r\nFaixa;SKUs;Percentual\r\n';
+  fxCounts.forEach((v,i) => {
+    const pct = fxSum>0 ? ((v/fxSum)*100).toFixed(1)+'%' : '0.0%';
+    csv += fxLabels[i] + ';' + v + ';' + pct + '\r\n';
+  });
+  csv += '\r\n';
+
+    const filename = 'pesquisa_' + rede + '_' + dataHoje + '.csv';
 
   // Tenta download universal — funciona no Android e iOS 13+
   try {
