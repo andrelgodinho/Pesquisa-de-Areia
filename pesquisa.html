@@ -623,7 +623,7 @@ function addTipoRow() {
         <div class="metric-label">Frentes</div>
         <div class="stepper">
           <button onclick="stepperChange('trf${id}',-1)">−</button>
-          <input type="number" id="trf${id}" value="0" min="0" inputmode="numeric">
+          <input type="number" id="trf${id}" value="0" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
           <button onclick="stepperChange('trf${id}',1)">+</button>
         </div>
       </div>
@@ -631,7 +631,7 @@ function addTipoRow() {
         <div class="metric-label">Prateleiras</div>
         <div class="stepper">
           <button onclick="stepperChange('trp${id}',-1)">−</button>
-          <input type="number" id="trp${id}" value="0" min="0" inputmode="numeric">
+          <input type="number" id="trp${id}" value="0" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
           <button onclick="stepperChange('trp${id}',1)">+</button>
         </div>
       </div>
@@ -699,7 +699,7 @@ function addMarcaFrente() {
         <div class="metric-label">Frentes</div>
         <div class="stepper">
           <button onclick="stepperChange('mff${id}',-1)">−</button>
-          <input type="number" id="mff${id}" value="0" min="0" inputmode="numeric">
+          <input type="number" id="mff${id}" value="0" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
           <button onclick="stepperChange('mff${id}',1)">+</button>
         </div>
       </div>
@@ -707,7 +707,7 @@ function addMarcaFrente() {
         <div class="metric-label">Prateleiras</div>
         <div class="stepper">
           <button onclick="stepperChange('mfp${id}',-1)">−</button>
-          <input type="number" id="mfp${id}" value="0" min="0" inputmode="numeric">
+          <input type="number" id="mfp${id}" value="0" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
           <button onclick="stepperChange('mfp${id}',1)">+</button>
         </div>
       </div>
@@ -753,8 +753,16 @@ function addPrecoRow() {
 function stepperChange(id, delta) {
   const el = document.getElementById(id);
   if (!el) return;
-  const val = Math.max(0, (parseInt(el.value) || 0) + delta);
-  el.value = val;
+  const step = parseFloat(el.step) || 1;
+  const current = parseFloat(el.value) || 0;
+  let val = Math.max(0, current + delta);
+  // Se o input suporta decimais, arredonda para 2 casas
+  if (step < 1) {
+    val = Math.round(val * 100) / 100;
+    el.value = val.toFixed(2);
+  } else {
+    el.value = Math.round(val);
+  }
 }
 
 // ── Navigation ─────────────────────────────────────────
