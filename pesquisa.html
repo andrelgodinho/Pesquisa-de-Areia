@@ -44,7 +44,7 @@
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
   /* ── STEPPER BASE ── */
-  .stepper { display: flex; align-items: center; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .stepper { display: flex; align-items: center; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; width: 100%; }
   .stepper button { background: none; border: none; color: var(--accent); font-size: 28px; font-weight: 700; width: 64px; height: 60px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; flex-shrink: 0; }
   .stepper button:active { background: var(--surface2); }
   .stepper input { border: none !important; border-radius: 0 !important; flex: 1; padding: 0 !important; height: 60px; border-left: 1px solid var(--border) !important; border-right: 1px solid var(--border) !important; color: var(--accent); box-shadow: none !important; background: var(--input-bg) !important; font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 700; text-align: center; width: auto; }
@@ -52,10 +52,10 @@
   /* ── STEPPERS GRANDES — etapas 2, 3 e 4 ── */
   .gondola-metrics .stepper button,
   .tipo-row-metrics .stepper button,
-  .marca-row-metrics .stepper button { width: 80px !important; height: 90px !important; font-size: 38px !important; }
+  .marca-row-metrics .stepper button { width: 72px !important; height: 80px !important; font-size: 34px !important; }
   .gondola-metrics .stepper input,
   .tipo-row-metrics .stepper input,
-  .marca-row-metrics .stepper input { height: 90px !important; font-size: 36px !important; }
+  .marca-row-metrics .stepper input { height: 80px !important; font-size: 32px !important; }
 
   /* ── GÔNDOLA ── */
   .gondola-block { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; }
@@ -66,12 +66,12 @@
   .gondola-block:not(.open) .gondola-chevron { transform: rotate(180deg); }
   .gondola-body { display: none; padding: 8px; }
   .gondola-block.open .gondola-body { display: block; }
-  .gondola-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .gondola-metrics { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 8px; }
   .metric-label { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 
   /* ── TIPO / MARCA ROWS ── */
   .tipo-row, .marca-row { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px; margin-bottom: 8px; }
-  .tipo-row-metrics, .marca-row-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .tipo-row-metrics, .marca-row-metrics { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 8px; }
 
   /* ── PREÇO (etapa 5) ── */
   .preco-input { width: 100%; background: #E8F5E8; border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 20px !important; font-weight: 600; padding: 14px 16px !important; height: auto !important; text-align: left; outline: none; -webkit-appearance: none; }
